@@ -1,8 +1,8 @@
 package com.semi.spring.board.model.dao;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
-@Service
+@Repository
 public class ReplyDaoImpl implements ReplyDao{
 
 }

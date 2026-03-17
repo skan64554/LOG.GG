@@ -1,10 +1,16 @@
 package com.semi.spring.board.model.service;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Service @Slf4j
+@Service
 public class BoardServiceImpl implements BoardService{
+
+	@Override
+	public Map<String, String> getBoardTypeMap() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

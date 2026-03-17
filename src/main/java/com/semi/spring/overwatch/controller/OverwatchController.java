@@ -1,8 +1,5 @@
-package com.semi.spring.board.controller;
+package com.semi.spring.overwatch.controller;
 
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.ResourceLoader;
@@ -12,25 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.semi.spring.board.model.service.BoardService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Controller
-@RequestMapping("/board")
+@RequestMapping("/overwatch")
 @RequiredArgsConstructor
-public class BoardController {
+public class OverwatchController {
 
 	private final BoardService boardService;
 	private final ResourceLoader resourceLoader;
 	private final ServletContext application; // application scope
-	
-	@PostConstruct
-	public void init() {
-		
-		// key=코드 , value=게시판이름
-		Map<String, String> boardTypeMap
-			= boardService.getBoardTypeMap();
-		application.setAttribute("boardTypeMap", boardTypeMap);
-		log.debug("boardTypeMap : {}" , boardTypeMap);
-	}
 }

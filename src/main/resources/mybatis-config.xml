@@ -9,5 +9,6 @@
 
 	<typeAliases>
 		<package name="com.semi.spring"/>
+
 	</typeAliases>
 </configuration>
