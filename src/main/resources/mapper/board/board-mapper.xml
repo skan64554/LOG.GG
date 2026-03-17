@@ -1,5 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="board">
-
+	
+	<select id="getBoardTypeMap" resultType="boardType" >
+		
+	</select> 	
+	
+	<select id="selectList" resultType="board">
+		SELECT *
+		FROM (
+		    SELECT ROWNUM AS RNUM , T1.* 
+		    FROM (
+		        SELECT 
+		            
+		        FROM BOARD B
+		        LEFT JOIN LOG_GG_USER LG ON 
+		        WHERE BOARD_CD = 'Y'
+		        <if test="keyword != null and keyword != ''">
+		        	AND 
+		        	<choose>
+		        		<when test="condition.equals('title')">
+		        			BOARD_TITLE LIKE '%' || #{keyword} || '%'
+		        		</when>
+		        		<when test="condition.equals('writer')">
+		        			USER_NAME LIKE '%' || #{keyword} || '%'
+		        		</when>
+		        		<when test="condition.equals('content')">
+		        			BOARD_CONTENT LIKE '%' || #{keyword} || '%'
+		        		</when>
+		        		<otherwise>
+		        			(BOARD_TITLE LIKE '%' || #{keyword} || '%'
+		        			OR BOARD_CONTENT LIKE '%' || #{keyword} || '%')
+		        		</otherwise>		        		
+		        	</choose>
+		        </if>		        
+		        ORDER BY BOARD_NO DESC) T1
+		)
+		WHERE RNUM BETWEEN #{offset} AND #{limit}
+	</select>
+	
+	<select id="selectBoard" resultType="board">
+		SELECT * FROM BOARD
+		WHERE BOARD_NO = #{boardNo} AND BOARD_CD = 'Y'
+		
+	</select>
+	
+	<select id="selectReplyList" resultType="reply">
+		SELECT * FROM REPLY
+		WHERE BOARD_NO = #{boardNo} AND STATUS = 'Y'
+		ORDER BY REPLY_DATE DESC
+	</select>
+	
+	<select id="selectBoardFileList" resultType="ATTACH_FILE">
+		SELECT *
+        FROM ATTACH_FILE
+        WHERE BOARD_NO = #{boardNo}
+	</select>
+	
+	<select id="selectListCount" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD B
+		LEFT JOIN LOG_GG_USER LG ON 
+		WHERE BOARD_CD = 'Y'
+		<if test="keyword != null and keyword != ''">
+        	AND 
+        	<choose>
+        		<when test="condition.equals('title')">
+        			BOARD_TITLE LIKE '%' || #{keyword} || '%'
+        		</when>
+        		<when test="condition.equals('writer')">
+        			USER_NAME LIKE '%' || #{keyword} || '%'
+        		</when>
+        		<when test="condition.equals('content')">
+        			BOARD_CONTENT LIKE '%' || #{keyword} || '%'
+        		</when>
+        		<otherwise>
+        			(BOARD_TITLE LIKE '%' || #{keyword} || '%'
+        			OR BOARD_CONTENT LIKE '%' || #{keyword} || '%')
+        		</otherwise>		        		
+        	</choose>
+        </if>	
+	</select>
+	
+	 <update id="increaseCount">
+	 	UPDATE BOARD 
+	 	SET COUNT = COUNT + 1
+	 	WHERE BOARD_NO = #{boardNo}
+	 </update>
+	 
+	<insert id="insertBoard">
+		<selectKey keyProperty="boardNo" resultType="int" order="BEFORE">
+        SELECT SEQ_BNO.NEXTVAL FROM DUAL
+    	</selectKey>
+    	INSERT INTO BOARD (
+        	BOARD_NO,USER_ID,USER_NAME,
+			BOARD_CONTENT,BOARD_TITLE,
+        	POST_DATE,BOARD_CD)
+    	VALUES (
+        	#{boardNo},#{boardWriter}, #{boardWriter}, 
+        	#{boardContent},#{boardTitle},
+        	DEFAULT,DEFAULT)
+	</insert>
+	
+	<insert id="insertBoardFile">
+		INSERT INTO ATTACH_FILE (
+            FILE_NO, BOARD_NO, ORIGIN_NAME, CHANGE_NAME, FILE_PATH, FILE_EXT, FILE_SIZE
+        ) VALUES (
+            SEQ_FNO.NEXTVAL, #{boardNo}, #{originName}, #{changeName}, #{filePath}, #{fileExt}, #{fileSize}
+        )
+	</insert>
+	
+	<insert id="insertBoardFileList">
+		INSERT INTO ATTACH_FILE (
+            FILE_NO, BOARD_NO, ORIGIN_NAME, CHANGE_NAME, FILE_PATH, FILE_EXT, FILE_SIZE
+        )
+        SELECT SEQ_FNO.NEXTVAL, A.* FROM (
+            <foreach collection="list" item="f" separator="UNION ALL">
+                SELECT 
+                    #{f.boardNo}, #{f.originName}, #{f.changeName}, 
+                    #{f.filePath}, #{f.fileExt}, #{f.fileSize}
+                FROM DUAL
+            </foreach>
+        ) A
+	</insert>
+	
+	<insert id="insertReply">
+		INSERT INTO REPLY (
+			COMMENT_NO, USER_ID, BOARD_NO, USER_NAME, BOARD_CONTENT
+		) VALUES (
+			SEQ_RNO.NEXTVAL, #{userId}, #{boardNo}, #{userName}, #{replyContent}
+		)
+	</insert>
+	
+	<update id="updateBoard">
+		UPDATE BOARD 
+		SET BOARD_TITLE = #{boardTitle}, 
+			BOARD_CONTENT = #{boardContent}
+		WHERE BOARD_NO = #{boardNo}
+	</update> 
+	
+	<update id="updateBoardFile">
+		UPDATE ATTACH_FILE
+        SET ORIGIN_NAME = #{originName},
+            CHANGE_NAME = #{changeName},
+            FILE_PATH = #{filePath}
+        WHERE FILE_NO = #{fileNo}
+	</update>
+	
+	<update id="deleteReply">
+		UPDATE REPLY SET STATUS = 'N' WHERE COMMENT_NO = #{commentNo}
+	</update>
+			
+	<update id="deleteBoard">
+    	UPDATE BOARD SET BOARD_CD = 'N' WHERE BOARD_NO = #{boardNo}
+	</update>
+	
 </mapper>
